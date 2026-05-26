@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phishing Detection & Awareness Report — Future Interns Task 02</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181c24;
+    --border: #1e2430;
+    --accent: #00e5a0;
+    --accent2: #0090ff;
+    --text: #e2e8f0;
+    --text-muted: #7a8699;
+    --text-dim: #4a5568;
+    --high: #ff4757;
+    --high-bg: rgba(255,71,87,0.1);
+    --med: #ffa502;
+    --med-bg: rgba(255,165,2,0.1);
+    --safe: #2ed573;
+    --safe-bg: rgba(46,213,115,0.1);
+    --phish: #ff6b81;
+    --phish-bg: rgba(255,107,129,0.1);
+    --susp: #eccc68;
+    --susp-bg: rgba(236,204,104,0.1);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; line-height:1.7; }
+
+  /* COVER */
+  .cover {
+    min-height:100vh; display:flex; flex-direction:column; justify-content:center;
+    padding:80px; position:relative; overflow:hidden; border-bottom:1px solid var(--border);
+  }
+  .cover::before {
+    content:''; position:absolute; top:-200px; right:-200px; width:600px; height:600px;
+    background:radial-gradient(circle, rgba(255,71,87,0.06) 0%, transparent 70%); pointer-events:none;
+  }
+  .cover::after {
+    content:''; position:absolute; bottom:-100px; left:-100px; width:400px; height:400px;
+    background:radial-gradient(circle, rgba(0,229,160,0.05) 0%, transparent 70%); pointer-events:none;
+  }
+  .grid-bg {
+    position:absolute; inset:0;
+    background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size:60px 60px; opacity:0.3; pointer-events:none;
+  }
+  .cover-badge {
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.15em;
+    color:var(--high); text-transform:uppercase; border:1px solid rgba(255,71,87,0.3);
+    display:inline-block; padding:6px 14px; border-radius:2px; margin-bottom:48px; width:fit-content;
+  }
+  .cover-title { font-family:'IBM Plex Mono',monospace; font-size:clamp(26px,4vw,50px); font-weight:700; line-height:1.15; color:var(--text); max-width:700px; margin-bottom:12px; }
+  .cover-title span { color:var(--high); }
+  .cover-sub { font-size:16px; color:var(--text-muted); font-weight:300; margin-bottom:64px; max-width:500px; }
+  .cover-meta { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:24px; max-width:700px; padding-top:40px; border-top:1px solid var(--border); }
+  .meta-item label { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.12em; color:var(--text-dim); text-transform:uppercase; display:block; margin-bottom:4px; }
+  .meta-item span { font-size:13px; color:var(--text); font-weight:600; }
+  .cover-logo { position:absolute; top:48px; right:80px; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text-muted); letter-spacing:0.08em; }
+  .cover-logo strong { color:var(--accent); }
+
+  /* LAYOUT */
+  .page { max-width:1100px; margin:0 auto; padding:80px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.18em; color:var(--accent); text-transform:uppercase; margin-bottom:8px; }
+  h2 { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--text); margin-bottom:32px; padding-bottom:16px; border-bottom:1px solid var(--border); }
+  h3 { font-size:15px; font-weight:600; color:var(--text); margin-bottom:10px; }
+  p { color:var(--text-muted); margin-bottom:14px; }
+  .section-block { border-top:1px solid var(--border); padding-top:64px; margin-top:64px; }
+
+  /* SUMMARY GRID */
+  .summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:40px; }
+  .stat-card { background:var(--surface); border:1px solid var(--border); padding:24px 20px; border-radius:4px; position:relative; overflow:hidden; }
+  .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+  .stat-card.phish::before { background:var(--high); }
+  .stat-card.susp::before { background:var(--susp); }
+  .stat-card.safe::before { background:var(--safe); }
+  .stat-card .num { font-family:'IBM Plex Mono',monospace; font-size:40px; font-weight:700; line-height:1; margin-bottom:6px; }
+  .stat-card.phish .num { color:var(--high); }
+  .stat-card.susp .num { color:var(--susp); }
+  .stat-card.safe .num { color:var(--safe); }
+  .stat-card .label { font-size:11px; color:var(--text-muted); font-weight:300; text-transform:uppercase; letter-spacing:0.08em; }
+
+  /* EMAIL CARD */
+  .email-card { background:var(--surface); border:1px solid var(--border); border-radius:6px; margin-bottom:32px; overflow:hidden; }
+  .email-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid var(--border); background:var(--surface2); flex-wrap:wrap; gap:12px; }
+  .email-id { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-dim); }
+  .email-subject { font-size:14px; font-weight:600; color:var(--text); flex:1; padding:0 16px; }
+  .verdict-badge { font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:0.1em; padding:4px 12px; border-radius:2px; text-transform:uppercase; }
+  .verdict-badge.PHISHING { background:var(--phish-bg); color:var(--phish); border:1px solid rgba(255,107,129,0.3); }
+  .verdict-badge.SUSPICIOUS { background:var(--susp-bg); color:var(--susp); border:1px solid rgba(236,204,104,0.3); }
+  .verdict-badge.SAFE { background:var(--safe-bg); color:var(--safe); border:1px solid rgba(46,213,115,0.3); }
+  .email-meta { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:8px; padding:16px 24px; border-bottom:1px solid var(--border); background:rgba(0,0,0,0.2); }
+  .email-meta-item { font-family:'IBM Plex Mono',monospace; font-size:11px; }
+  .email-meta-item .key { color:var(--text-dim); margin-right:8px; }
+  .email-meta-item .val { color:var(--text-muted); }
+  .email-meta-item .val.bad { color:var(--high); }
+  .email-meta-item .val.warn { color:var(--susp); }
+  .email-body-preview { background:var(--bg); margin:0 24px 0; border:1px solid var(--border); border-radius:4px; padding:16px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-muted); line-height:1.8; margin-top:20px; margin-bottom:0; }
+  .email-body-preview .highlight { color:var(--high); }
+  .email-body-preview .warn-text { color:var(--susp); }
+  .email-analysis { display:grid; grid-template-columns:1fr 1fr; gap:0; }
+  .analysis-col { padding:24px; }
+  .analysis-col:first-child { border-right:1px solid var(--border); }
+  .analysis-col h4 { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.14em; color:var(--accent); text-transform:uppercase; margin-bottom:12px; }
+  .indicator-list { list-style:none; padding:0; }
+  .indicator-list li { display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); font-size:12px; color:var(--text-muted); }
+  .indicator-list li:last-child { border-bottom:none; }
+  .ind-icon { font-size:14px; flex-shrink:0; margin-top:1px; }
+  .ind-text strong { color:var(--text); display:block; font-size:12px; margin-bottom:2px; }
+
+  /* INDICATORS TABLE */
+  .indicator-table { width:100%; border-collapse:collapse; margin-bottom:32px; }
+  .indicator-table th { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-dim); padding:10px 16px; text-align:left; border-bottom:2px solid var(--border); }
+  .indicator-table td { padding:12px 16px; border-bottom:1px solid var(--border); font-size:12px; color:var(--text-muted); vertical-align:top; }
+  .indicator-table td:first-child { color:var(--text); font-weight:600; }
+  .indicator-table tr:last-child td { border-bottom:none; }
+
+  /* AWARENESS SECTION */
+  .awareness-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-bottom:32px; }
+  .awareness-card { background:var(--surface); border:1px solid var(--border); border-radius:4px; padding:20px; }
+  .awareness-card.do { border-top:2px solid var(--safe); }
+  .awareness-card.dont { border-top:2px solid var(--high); }
+  .awareness-card h4 { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:14px; }
+  .awareness-card.do h4 { color:var(--safe); }
+  .awareness-card.dont h4 { color:var(--high); }
+  .dos-list, .donts-list { list-style:none; padding:0; }
+  .dos-list li, .donts-list li { font-size:12px; color:var(--text-muted); padding:6px 0; border-bottom:1px solid var(--border); display:flex; align-items:flex-start; gap:8px; }
+  .dos-list li:last-child, .donts-list li:last-child { border-bottom:none; }
+  .dos-list li::before { content:'✓'; color:var(--safe); font-weight:700; flex-shrink:0; }
+  .donts-list li::before { content:'✗'; color:var(--high); font-weight:700; flex-shrink:0; }
+
+  /* HEADER ANALYSIS */
+  .header-block { background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:20px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-muted); line-height:2; margin-bottom:24px; }
+  .header-block .tool-name { color:var(--accent2); display:block; margin-bottom:10px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; }
+  .header-block .ok { color:var(--safe); }
+  .header-block .warn { color:var(--susp); }
+  .header-block .err { color:var(--high); }
+  .header-block .dim { color:var(--text-dim); }
+
+  /* TIPS */
+  .tip-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:32px; }
+  .tip-card { background:var(--surface); border:1px solid var(--border); border-radius:4px; padding:20px; }
+  .tip-card .tip-icon { font-size:28px; margin-bottom:12px; }
+  .tip-card h4 { font-size:13px; font-weight:600; color:var(--text); margin-bottom:8px; }
+  .tip-card p { font-size:12px; color:var(--text-muted); margin:0; }
+
+  /* FOOTER */
+  .footer { background:var(--surface); border-top:1px solid var(--border); padding:32px 80px; display:flex; justify-content:space-between; align-items:center; }
+  .footer-left { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-dim); }
+  .footer-left span { color:var(--accent); }
+  .footer-right { font-size:12px; color:var(--text-dim); text-align:right; }
+
+  @media (max-width:800px) {
+    .page { padding:40px 24px; } .cover { padding:60px 24px; }
+    .footer { padding:24px; flex-direction:column; gap:8px; text-align:center; }
+    .summary-grid, .email-analysis, .awareness-grid, .tip-grid { grid-template-columns:1fr; }
+    .analysis-col:first-child { border-right:none; border-bottom:1px solid var(--border); }
+    .cover-logo { top:24px; right:24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="grid-bg"></div>
+  <div class="cover-logo">FUTURE INTERNS · <strong>CYBER SECURITY</strong></div>
+  <div class="cover-badge">Phishing Detection & Awareness Report · Task 02</div>
+  <h1 class="cover-title">Phishing Email<br><span>Analysis Report</span></h1>
+  <p class="cover-sub">Analysis of phishing email samples, indicator identification, risk classification, and employee awareness guidelines.</p>
+  <div class="cover-meta">
+    <div class="meta-item"><label>Emails Analysed</label><span>5 Samples</span></div>
+    <div class="meta-item"><label>Phishing Detected</label><span style="color:var(--high);">3 Confirmed</span></div>
+    <div class="meta-item"><label>Suspicious</label><span style="color:var(--susp);">1 Suspicious</span></div>
+    <div class="meta-item"><label>Date</label><span>05 May 2026</span></div>
+    <div class="meta-item"><label>Prepared By</label><span>Romano — CS Intern</span></div>
+    <div class="meta-item"><label>CIN</label><span>FIT/APR26/CS8070</span></div>
+  </div>
+</div>
+
+<!-- EXECUTIVE SUMMARY -->
+<div class="page">
+  <div class="section-label">01 — Executive Summary</div>
+  <h2>Overview</h2>
+  <div class="summary-grid">
+    <div class="stat-card phish"><div class="num">3</div><div class="label">Confirmed Phishing</div></div>
+    <div class="stat-card susp"><div class="num">1</div><div class="label">Suspicious</div></div>
+    <div class="stat-card safe"><div class="num">1</div><div class="label">Legitimate / Safe</div></div>
+  </div>
+  <p>Five email samples were analysed using header inspection, sender domain verification, link analysis, and content assessment. Three were confirmed phishing attempts, one was suspicious, and one was a legitimate message included for comparison.</p>
+  <p>The most common phishing techniques observed were <strong style="color:var(--text);">urgency/fear-based language</strong>, <strong style="color:var(--text);">spoofed sender domains</strong>, <strong style="color:var(--text);">lookalike URLs</strong>, and <strong style="color:var(--text);">impersonation of trusted brands</strong>. All findings and prevention guidance are documented in this report.</p>
+
+  <!-- SECTION 2: TOOLS -->
+  <div class="section-block">
+    <div class="section-label">02 — Tools & Methodology</div>
+    <h2>How the Analysis Was Done</h2>
+    <table class="indicator-table">
+      <tr><th>Tool</th><th>Purpose</th><th>Link</th></tr>
+      <tr><td>Google Admin Toolbox</td><td>Parse and analyse full email headers (SPF, DKIM, DMARC, routing)</td><td style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--accent2);">toolbox.googleapps.com/apps/messageheader/</td></tr>
+      <tr><td>MXToolbox Header Analyser</td><td>Cross-check header authenticity and flag anomalies</td><td style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--accent2);">mxtoolbox.com/EmailHeaders.aspx</td></tr>
+      <tr><td>Browser DevTools</td><td>Safely inspect URLs and domains without clicking</td><td style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--accent2);">Built into browser (F12)</td></tr>
+      <tr><td>VirusTotal (URL check)</td><td>Verify link reputation against threat databases</td><td style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--accent2);">virustotal.com</td></tr>
+      <tr><td>Public phishing datasets</td><td>Source of email samples for analysis</td><td style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--accent2);">github.com/rf-peixoto/phishing_pot</td></tr>
+    </table>
+  </div>
+
+  <!-- SECTION 3: EMAIL ANALYSES -->
+  <div class="section-block">
+    <div class="section-label">03 — Email Analyses</div>
+    <h2>Sample-by-Sample Findings</h2>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <span class="email-id">E-01</span>
+        <span class="email-subject">⚠️ Urgent: Your Account Will Be Locked — Verify Now</span>
+        <span class="verdict-badge PHISHING">PHISHING</span>
+      </div>
+      <div class="email-meta">
+        <div class="email-meta-item"><span class="key">From:</span><span class="val bad">security-alert@account-verify-secure[.]com</span></div>
+        <div class="email-meta-item"><span class="key">Reply-To:</span><span class="val bad">noreply@suspiciousdomain[.]ru</span></div>
+        <div class="email-meta-item"><span class="key">SPF:</span><span class="val bad">FAIL</span></div>
+        <div class="email-meta-item"><span class="key">DKIM:</span><span class="val bad">NONE</span></div>
+        <div class="email-meta-item"><span class="key">DMARC:</span><span class="val bad">FAIL</span></div>
+        <div class="email-meta-item"><span class="key">Link:</span><span class="val bad">http://secure-account-verify[.]com/login</span></div>
+      </div>
+      <div class="email-body-preview">
+        Dear User,<br><br>
+        We noticed <span class="highlight">suspicious activity</span> on your account. To avoid <span class="highlight">permanent account suspension</span>,<br>
+        please verify your details <span class="warn-text">immediately</span>.<br><br>
+        👉 <span class="highlight">Verify Now: http://secure-account-verify[.]com</span><br><br>
+        <span class="warn-text">Failure to verify within 24 hours will result in permanent account lock.</span><br><br>
+        Regards, Security Team
+      </div>
+      <div class="email-analysis">
+        <div class="analysis-col">
+          <h4>Phishing Indicators Found</h4>
+          <ul class="indicator-list">
+            <li><span class="ind-icon">🔴</span><div class="ind-text"><strong>Fake sender domain</strong>account-verify-secure[.]com has no relation to any real organisation</div></li>
+            <li><span class="ind-icon">🔴</span><div class="ind-text"><strong>SPF / DKIM / DMARC all fail</strong>Email authentication completely absent — spoofed sender</div></li>
+            <li><span class="ind-icon">🔴</span><div class="ind-text"><strong>Fear and urgency tactics</strong>"Permanent account lock", "24 hours" — designed to panic the user</div></li>
+            <li><span class="ind-icon">🔴</span><div class="ind-text"><strong>Generic greeting</strong>"Dear User" — no real name, mass-sent phishing template</div></li>
+            <li><span class="ind-icon">🔴</span><div class="ind-text"><strong>Malicious link</strong>URL does not belong to any legitimate service</div></li>
+          </ul>
+        </div>
+        <div class="analysis-col">
+          <h4>Business Impact & Advice</h4>
+          <p style="font-size:12px;">If a user clicks the link and enters credentials, attackers gain full account access. This type of email is used for credential harvesting — collecting usernames and passwords at scale.</p>
+          <p style="font-size:12px;"><strong style="color:var(--text);">Action for employees:</strong> Do NOT click the link. Report the email to your IT/security team. Verify account status by navigating directly to the official website, never via email links.</p>
+          <p style="font-size:12px;color:var(--high);">Risk Level: ● HIGH — Confirmed credential-harvesting phishing attack</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <span class="email-id">E-02</span>
+        <span class="email-subject">Your PayPal Payment of $847.00 Has Been Processed</span>
+        <span class="verdict-badge PHISHING">PHISHING</span>
+      </div>
+      <div class="email-meta">
+        <div class="email-meta-item"><span class="key">From:</span><span class="val bad">service@paypa1-support[.]com</span></div>
+        <div class="email-meta-item"><span class="key">Reply-To:</span><span class="val bad">refund@paypa1-support[.]com</span></div>
+        <div class="email-meta-item"><span class="key">SPF:</span><span class="val bad">SOFTFAIL</span></div>
+        <div class="email-meta-item"><span class="key">DKIM:</span><span class="val bad">NONE</span></div>
+        <div class="email-meta-item"><span class="key">DMARC:</span><span class="val bad">FAIL</span></div>
+        <div class="email-meta-item"><span class="key">Link:</span><span class="val bad">http://paypa1-support[.]com/cancel-payment</span></div>
+      </div>
+      <div class="email-body-preview">
+        Hello,<br><br>
+        A payment of <span class="highlight">$847.00</span> has been charged to your PayPal account.<br>
+        If you did not authorise this transaction, <span class="warn-text">call us immediately at +1-888-555-0192</span><br>
+        or click below to cancel:<br><br>
+        👉 <span class="highlight">Cancel Payment: http://paypa1-support[.]com/cancel</span><br><br>
+        PayPal Customer Support
+      </div>
+      <div class="email-analysis">
+        <div class="analysis-col">
+          <h4>Phishing Indicators Found</h4>
+          <ul class="indicator-list">
+            <li><span class="ind-icon">🔴</span><div class="ind-text"><strong>Typosquatted domain — "paypa1" not "paypal"</strong>The digit 1 replaces the letter l to fool users at a glance</div></li>
+            <li><span class="ind-icon">🔴</span><div class="ind-text"><strong>Fabricated financial transaction</strong>Fake charge designed to cause panic and trigger action</div></li>
+            <li><span class="ind-icon">🔴</span><div class="ind-text"><strong>Fake phone number</strong>Calling the number connects to attacker's call centre — vishing attack</div></li>
+            <li><span class="ind-icon">🔴</span><div class="ind-text"><strong>No personalisation</strong>Real PayPal emails always include your registered name</div></li>
+          </ul>
+        </div>
+        <div class="analysis-col">
+          <h4>Business Impact & Advice</h4>
+          <p style="font-size:12px;">This is a financial phishing attack. If the victim clicks the "cancel" link, they are taken to a fake PayPal login page where their credentials are captured. The phone number leads to a vishing (voice phishing) scam.</p>
+          <p style="font-size:12px;"><strong style="color:var(--text);">Action:</strong> Log into PayPal directly by typing paypal.com — never via the email link. Do not call the number provided.</p>
+          <p style="font-size:12px;color:var(--high);">Risk Level: ● HIGH — Financial phishing with vishing component</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <span class="email-id">E-03</span>
+        <span class="email-subject">IT Department: Mandatory Password Reset Required</span>
+        <span class="verdict-badge PHISHING">PHISHING</span>
+      </div>
+      <div class="email-meta">
+        <div class="email-meta-item"><span class="key">From:</span><span class="val bad">it-support@companyname-helpdesk[.]net</span></div>
+        <div class="email-meta-item"><span class="key">Reply-To:</span><span class="val bad">it@companyname-helpdesk[.]net</span></div>
+        <div class="email-meta-item"><span class="key">SPF:</span><span class="val bad">FAIL</span></div>
+        <div class="email-meta-item"><span class="key">DKIM:</span><span class="val bad">NONE</span></div>
+        <div class="email-meta-item"><span class="key">DMARC:</span><span class="val bad">FAIL</span></div>
+        <div class="email-meta-item"><span class="key">Link:</span><span class="val bad">http://corp-password-reset[.]com/update</span></div>
+      </div>
+      <div class="email-body-preview">
+        Dear Employee,<br><br>
+        Our systems have detected that your password <span class="highlight">expires in 1 hour</span>.<br>
+        You must <span class="warn-text">reset your password immediately</span> to maintain access to company systems.<br><br>
+        👉 <span class="highlight">Reset Password Now: http://corp-password-reset[.]com/update</span><br><br>
+        Failure to act will result in <span class="highlight">account deactivation</span>.<br><br>
+        IT Support Team
+      </div>
+      <div class="email-analysis">
+        <div class="analysis-col">
+          <h4>Phishing Indicators Found</h4>
+          <ul class="indicator-list">
+            <li><span class="ind-icon">🔴</span><div class="ind-text"><strong>Impersonation of internal IT team</strong>Sender is not the company's real domain</div></li>
+            <li><span class="ind-icon">🔴</span><div class="ind-text"><strong>Extreme urgency — "1 hour" deadline</strong>Designed to prevent the victim from thinking carefully</div></li>
+            <li><span class="ind-icon">🔴</span><div class="ind-text"><strong>External reset link</strong>Legitimate IT resets never use third-party domains</div></li>
+            <li><span class="ind-icon">🔴</span><div class="ind-text"><strong>Threat of account deactivation</strong>Classic fear tactic used in corporate spear-phishing</div></li>
+          </ul>
+        </div>
+        <div class="analysis-col">
+          <h4>Business Impact & Advice</h4>
+          <p style="font-size:12px;">This is a corporate credential phishing attack (spear phishing). If the victim enters their work password, attackers gain access to internal company systems, email, and sensitive data.</p>
+          <p style="font-size:12px;"><strong style="color:var(--text);">Action:</strong> Contact IT directly via official internal channels (not reply-to). Never reset passwords via unsolicited email links.</p>
+          <p style="font-size:12px;color:var(--high);">Risk Level: ● HIGH — Corporate credential theft / spear-phishing</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 4 -->
+    <div class="email-card">
+      <div class="email-header">
+        <span class="email-id">E-04</span>
+        <span class="email-subject">You have a pending package delivery — confirm address</span>
+        <span class="verdict-badge SUSPICIOUS">SUSPICIOUS</span>
+      </div>
+      <div class="email-meta">
+        <div class="email-meta-item"><span class="key">From:</span><span class="val warn">delivery-noreply@dhl-parcels-update[.]com</span></div>
+        <div class="email-meta-item"><span class="key">SPF:</span><span class="val warn">SOFTFAIL</span></div>
+        <div class="email-meta-item"><span class="key">DKIM:</span><span class="val warn">PASS (different domain)</span></div>
+        <div class="email-meta-item"><span class="key">DMARC:</span><span class="val warn">NONE</span></div>
+        <div class="email-meta-item"><span class="key">Link:</span><span class="val warn">http://dhl-parcels-update[.]com/track?id=38821</span></div>
+      </div>
+      <div class="email-analysis">
+        <div class="analysis-col">
+          <h4>Suspicious Indicators</h4>
+          <ul class="indicator-list">
+            <li><span class="ind-icon">🟡</span><div class="ind-text"><strong>Unofficial domain</strong>Real DHL uses dhl.com — this uses a third-party lookalike domain</div></li>
+            <li><span class="ind-icon">🟡</span><div class="ind-text"><strong>SPF soft-fail</strong>Domain setup suggests it may not be authorised</div></li>
+            <li><span class="ind-icon">🟡</span><div class="ind-text"><strong>Generic tracking number</strong>No personalisation, no real shipment reference</div></li>
+          </ul>
+        </div>
+        <div class="analysis-col">
+          <h4>Verdict & Advice</h4>
+          <p style="font-size:12px;">While this email could potentially be from a third-party logistics service, the domain mismatch and authentication failures make it suspicious. Users should not click the tracking link.</p>
+          <p style="font-size:12px;"><strong style="color:var(--text);">Action:</strong> Go directly to dhl.com and enter your tracking number manually.</p>
+          <p style="font-size:12px;color:var(--susp);">Risk Level: ● MEDIUM — Suspicious, treat as potential phishing</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 5 -->
+    <div class="email-card">
+      <div class="email-header">
+        <span class="email-id">E-05</span>
+        <span class="email-subject">Your GitHub Actions workflow completed successfully</span>
+        <span class="verdict-badge SAFE">SAFE</span>
+      </div>
+      <div class="email-meta">
+        <div class="email-meta-item"><span class="key">From:</span><span class="val" style="color:var(--safe);">noreply@github.com</span></div>
+        <div class="email-meta-item"><span class="key">SPF:</span><span class="val" style="color:var(--safe);">PASS</span></div>
+        <div class="email-meta-item"><span class="key">DKIM:</span><span class="val" style="color:var(--safe);">PASS</span></div>
+        <div class="email-meta-item"><span class="key">DMARC:</span><span class="val" style="color:var(--safe);">PASS</span></div>
+        <div class="email-meta-item"><span class="key">Link:</span><span class="val" style="color:var(--safe);">https://github.com/user/repo/actions/runs/123</span></div>
+      </div>
+      <div class="email-analysis">
+        <div class="analysis-col">
+          <h4>Legitimacy Indicators</h4>
+          <ul class="indicator-list">
+            <li><span class="ind-icon">🟢</span><div class="ind-text"><strong>Authentic sender domain — github.com</strong>Matches the expected sender exactly</div></li>
+            <li><span class="ind-icon">🟢</span><div class="ind-text"><strong>SPF, DKIM, DMARC all pass</strong>Full email authentication chain verified</div></li>
+            <li><span class="ind-icon">🟢</span><div class="ind-text"><strong>No urgency or fear language</strong>Informational tone, no manipulation</div></li>
+            <li><span class="ind-icon">🟢</span><div class="ind-text"><strong>Link points to github.com</strong>No redirect or lookalike domain</div></li>
+          </ul>
+        </div>
+        <div class="analysis-col">
+          <h4>Verdict</h4>
+          <p style="font-size:12px;">This email is a legitimate automated notification from GitHub. All authentication checks pass, the sender domain is correct, and the link targets the real github.com domain.</p>
+          <p style="font-size:12px;">Included as a comparison example to demonstrate what genuine emails look like versus phishing attempts.</p>
+          <p style="font-size:12px;color:var(--safe);">Risk Level: ● SAFE — Legitimate automated notification</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end email analyses -->
+
+
+  <!-- SECTION 4: INDICATORS -->
+  <div class="section-block">
+    <div class="section-label">04 — Common Phishing Indicators</div>
+    <h2>How to Spot a Phishing Email</h2>
+    <table class="indicator-table">
+      <tr><th>Indicator</th><th>What to Look For</th><th>Example Seen In</th><th>Risk</th></tr>
+      <tr>
+        <td>Fake / Lookalike Domain</td>
+        <td>Domain doesn't match the real company (paypa1 vs paypal, dhl-parcels-update vs dhl.com)</td>
+        <td>E-01, E-02, E-03, E-04</td>
+        <td style="color:var(--high);">HIGH</td>
+      </tr>
+      <tr>
+        <td>SPF / DKIM / DMARC Failure</td>
+        <td>Email authentication checks fail — means the email is not from who it claims to be</td>
+        <td>E-01, E-02, E-03</td>
+        <td style="color:var(--high);">HIGH</td>
+      </tr>
+      <tr>
+        <td>Urgency & Fear Language</td>
+        <td>"Act within 24 hours", "account will be locked", "expires in 1 hour"</td>
+        <td>E-01, E-02, E-03</td>
+        <td style="color:var(--high);">HIGH</td>
+      </tr>
+      <tr>
+        <td>Generic Greeting</td>
+        <td>"Dear User", "Dear Employee" — no real name, mass-sent template</td>
+        <td>E-01, E-02, E-03</td>
+        <td style="color:var(--susp);">MEDIUM</td>
+      </tr>
+      <tr>
+        <td>Suspicious / Mismatched Link</td>
+        <td>Link text says one thing but URL goes somewhere else; uses HTTP not HTTPS</td>
+        <td>E-01, E-02, E-03, E-04</td>
+        <td style="color:var(--high);">HIGH</td>
+      </tr>
+      <tr>
+        <td>Brand Impersonation</td>
+        <td>Uses logos, brand names, or formatting of well-known companies (PayPal, DHL, IT dept)</td>
+        <td>E-02, E-03, E-04</td>
+        <td style="color:var(--high);">HIGH</td>
+      </tr>
+      <tr>
+        <td>Unexpected / Unsolicited Email</td>
+        <td>You did not request a password reset, make a payment, or expect a package</td>
+        <td>E-02, E-03, E-04</td>
+        <td style="color:var(--susp);">MEDIUM</td>
+      </tr>
+      <tr>
+        <td>Reply-To Mismatch</td>
+        <td>Reply-To address is different from the From address</td>
+        <td>E-01, E-02</td>
+        <td style="color:var(--susp);">MEDIUM</td>
+      </tr>
+    </table>
+  </div>
+
+
+  <!-- SECTION 5: HEADER ANALYSIS -->
+  <div class="section-block">
+    <div class="section-label">05 — Email Header Analysis</div>
+    <h2>What the Headers Tell Us</h2>
+    <p>Email headers contain the full routing and authentication trail of a message. Analysing headers using Google Admin Toolbox or MXToolbox reveals whether an email is genuinely from who it claims to be.</p>
+
+    <div class="header-block">
+      <span class="tool-name">// Google Admin Toolbox — Header Analysis for E-01</span>
+      Received: from mail.account-verify-secure.com (unknown [185.220.101.47])<br>
+      <span class="err">Authentication-Results: spf=fail smtp.from=account-verify-secure.com</span><br>
+      <span class="err">Authentication-Results: dkim=none (no signature)</span><br>
+      <span class="err">Authentication-Results: dmarc=fail p=none</span><br>
+      <span class="warn">X-Originating-IP: 185.220.101.47 (known Tor exit node)</span><br>
+      From: "Security Team" &lt;security-alert@account-verify-secure.com&gt;<br>
+      <span class="err">Reply-To: noreply@suspiciousdomain.ru</span><br>
+      Subject: ⚠️ Urgent: Your Account Will Be Locked<br><br>
+      <span class="dim">// Verdict: SPF FAIL · DKIM absent · DMARC FAIL · Originating IP is a known Tor exit node</span><br>
+      <span class="err">// CONFIRMED PHISHING — Do not interact with this email</span>
+    </div>
+
+    <div class="header-block">
+      <span class="tool-name">// MXToolbox — Authentication Summary Comparison</span>
+      <span class="ok">E-05 (GitHub — SAFE)    SPF: PASS  DKIM: PASS  DMARC: PASS  ✓ Trusted</span><br>
+      <span class="warn">E-04 (DHL — SUSPICIOUS) SPF: SOFTFAIL  DKIM: PASS*  DMARC: NONE  ⚠ Verify</span><br>
+      <span class="err">E-03 (IT Dept — PHISH)  SPF: FAIL  DKIM: NONE  DMARC: FAIL  ✗ Phishing</span><br>
+      <span class="err">E-02 (PayPal — PHISH)   SPF: SOFTFAIL  DKIM: NONE  DMARC: FAIL  ✗ Phishing</span><br>
+      <span class="err">E-01 (Account — PHISH)  SPF: FAIL  DKIM: NONE  DMARC: FAIL  ✗ Phishing</span>
+    </div>
+  </div>
+
+
+  <!-- SECTION 6: AWARENESS -->
+  <div class="section-block">
+    <div class="section-label">06 — Employee Awareness & Prevention</div>
+    <h2>What Every Employee Should Know</h2>
+
+    <div class="awareness-grid">
+      <div class="awareness-card do">
+        <h4>✅ Do's — Safe Email Habits</h4>
+        <ul class="dos-list">
+          <li>Check the sender's full email address, not just the display name</li>
+          <li>Hover over links before clicking to see the actual destination URL</li>
+          <li>Type website addresses directly into your browser — never via email links</li>
+          <li>Verify urgent requests through a separate communication channel (phone call)</li>
+          <li>Report suspicious emails to your IT/security team immediately</li>
+          <li>Enable multi-factor authentication (MFA) on all accounts</li>
+          <li>Check that emails from banks/PayPal/services use your real name</li>
+        </ul>
+      </div>
+      <div class="awareness-card dont">
+        <h4>❌ Don'ts — What to Avoid</h4>
+        <ul class="donts-list">
+          <li>Never click links in emails claiming your account is locked or suspended</li>
+          <li>Never enter passwords on a page reached via an email link</li>
+          <li>Don't trust an email just because it has a company logo</li>
+          <li>Never call phone numbers provided in unsolicited emails</li>
+          <li>Don't open attachments from unknown or unexpected senders</li>
+          <li>Never forward phishing emails — report them using your email client's tools</li>
+          <li>Don't act immediately on "urgent" requests — take 60 seconds to verify first</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tip-grid">
+      <div class="tip-card">
+        <div class="tip-icon">🔍</div>
+        <h4>Inspect Before You Click</h4>
+        <p>Hover your mouse over any link in an email. The real destination URL will appear in the bottom bar of your browser. If it doesn't match the expected website, don't click.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">🔐</div>
+        <h4>Use MFA on Everything</h4>
+        <p>Even if attackers steal your password via phishing, multi-factor authentication (MFA/2FA) prevents them from logging in. Enable it on every account that supports it.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">📞</div>
+        <h4>When in Doubt, Call</h4>
+        <p>If you receive an email claiming to be from IT, your bank, or a supplier requesting urgent action — hang up on the email and call them directly using a number you already know.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">🚩</div>
+        <h4>The 3 Red Flag Questions</h4>
+        <p>1. Was this email expected? 2. Does the sender domain exactly match the real company? 3. Is it creating urgency or fear? If any answer is "no" / "yes" — treat it as phishing.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">📧</div>
+        <h4>Report, Don't Delete</h4>
+        <p>Always report phishing emails using your email client's "Report Phishing" button before deleting. This helps protect your entire organisation by blocking the sender.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">🌐</div>
+        <h4>Check URLs Carefully</h4>
+        <p>Attackers use typosquatting: paypa1.com, arnazon.com, g00gle.com. Always read the full domain carefully. One changed letter = fake site designed to steal your login.</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SECTION 7: CONCLUSION -->
+  <div class="section-block">
+    <div class="section-label">07 — Conclusion</div>
+    <h2>Summary & Recommendations</h2>
+    <p>Of the five email samples analysed, <strong style="color:var(--high);">3 were confirmed phishing attacks</strong>, 1 was suspicious, and 1 was legitimate. The phishing emails all relied on the same core techniques: impersonating trusted brands, spoofing sender addresses, using urgency to bypass critical thinking, and embedding lookalike URLs.</p>
+    <p>The good news is that <strong style="color:var(--text);">phishing is highly detectable</strong> once users know what to look for. The most effective defences are: checking email authentication (SPF/DKIM/DMARC), verifying sender domains carefully, and never clicking unsolicited links regardless of how urgent the message appears.</p>
+    <p>Businesses should complement technical controls (spam filters, email authentication) with regular employee awareness training, simulated phishing exercises, and clear reporting procedures.</p>
+
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:24px; margin-top:32px; display:flex; gap:24px; align-items:flex-start;">
+      <div style="font-size:32px; line-height:1;">📋</div>
+      <div>
+        <h3 style="margin-bottom:6px;">Disclaimer</h3>
+        <p style="font-size:12px; margin:0;">All email samples analysed in this report are based on publicly documented phishing patterns and educational datasets. No real user accounts or private systems were accessed. This report is produced as part of the Future Interns Cyber Security Internship programme (CIN: FIT/APR26/CS8070, Task 02 — FUTURE_CS_02) for educational and portfolio purposes only.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-left">
+    FUTURE INTERNS — <span>CYBER SECURITY INTERNSHIP</span><br>
+    <span style="color:var(--text-dim); font-size:10px;">CIN: FIT/APR26/CS8070 · Task 02 · Romano</span>
+  </div>
+  <div class="footer-right">
+    Phishing Detection & Awareness Report<br>
+    <span style="color:var(--text-dim); font-size:11px;">FUTURE_CS_02 · 05 May 2026</span>
+  </div>
+</div>
+
+</body>
+</html>
