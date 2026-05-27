@@ -1,0 +1,112 @@
+
+<div style="font-family: var(--font-mono); font-size: 12px; padding: 1rem 0;">
+
+  <div style="background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); margin-bottom: 1.5rem; overflow: hidden;">
+    <div style="background: #1a1a2e; padding: 10px 16px; display: flex; align-items: center; gap: 8px;">
+      <div style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57;"></div>
+      <div style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e;"></div>
+      <div style="width: 12px; height: 12px; border-radius: 50%; background: #28c840;"></div>
+      <span style="color: #888; font-size: 11px; margin-left: 8px;">MXToolbox — Email Header Analysis</span>
+    </div>
+    <div style="background: #0d1117; padding: 16px; color: #c9d1d9; line-height: 1.9;">
+      <div style="color: #58a6ff;">MXToolbox Email Header Analyzer — Analysis Results</div>
+      <div style="color: #8b949e; margin-top: 4px; margin-bottom: 12px;">Subject: Urgent Your Account Will Be Locked</div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+        <tr style="border-bottom: 1px solid #21262d;">
+          <td style="padding: 6px 8px; color: #8b949e; width: 180px;">From</td>
+          <td style="padding: 6px 8px; color: #f85149;">security-alert@account-verify-secure.com</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #21262d;">
+          <td style="padding: 6px 8px; color: #8b949e;">Reply-To</td>
+          <td style="padding: 6px 8px; color: #f85149;">noreply@suspiciousdomain.ru</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #21262d;">
+          <td style="padding: 6px 8px; color: #8b949e;">Originating IP</td>
+          <td style="padding: 6px 8px; color: #f85149;">185.220.101.47 (Tor exit node — blacklisted)</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #21262d;">
+          <td style="padding: 6px 8px; color: #8b949e;">SPF Check</td>
+          <td style="padding: 6px 8px; color: #f85149;">✗ FAIL — IP not authorised to send for this domain</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #21262d;">
+          <td style="padding: 6px 8px; color: #8b949e;">DKIM Check</td>
+          <td style="padding: 6px 8px; color: #f85149;">✗ NONE — No DKIM signature present</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #21262d;">
+          <td style="padding: 6px 8px; color: #8b949e;">DMARC Check</td>
+          <td style="padding: 6px 8px; color: #f85149;">✗ FAIL — Policy not satisfied</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #21262d;">
+          <td style="padding: 6px 8px; color: #8b949e;">Spam Score</td>
+          <td style="padding: 6px 8px; color: #f85149;">8.4 / 10 — HIGH RISK</td>
+        </tr>
+        <tr>
+          <td style="padding: 6px 8px; color: #8b949e;">Blacklist Status</td>
+          <td style="padding: 6px 8px; color: #f85149;">Listed on 14 of 14 RBL blacklists</td>
+        </tr>
+      </table>
+      <div style="margin-top: 12px; padding: 8px; background: rgba(248,81,73,0.1); border: 1px solid rgba(248,81,73,0.3); border-radius: 4px;">
+        <span style="color: #f85149; font-weight: 600;">VERDICT: CONFIRMED PHISHING — Do not interact with this email</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden;">
+    <div style="background: #1a1a2e; padding: 10px 16px; display: flex; align-items: center; gap: 8px;">
+      <div style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57;"></div>
+      <div style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e;"></div>
+      <div style="width: 12px; height: 12px; border-radius: 50%; background: #28c840;"></div>
+      <span style="color: #888; font-size: 11px; margin-left: 8px;">Email Authentication Summary — All 5 Samples</span>
+    </div>
+    <div style="background: #0d1117; padding: 16px; color: #c9d1d9; line-height: 1.9;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+        <tr style="border-bottom: 1px solid #21262d;">
+          <th style="padding: 6px 8px; color: #58a6ff; text-align: left; font-weight: normal;">Email Sample</th>
+          <th style="padding: 6px 8px; color: #58a6ff; text-align: left; font-weight: normal;">SPF</th>
+          <th style="padding: 6px 8px; color: #58a6ff; text-align: left; font-weight: normal;">DKIM</th>
+          <th style="padding: 6px 8px; color: #58a6ff; text-align: left; font-weight: normal;">DMARC</th>
+          <th style="padding: 6px 8px; color: #58a6ff; text-align: left; font-weight: normal;">Verdict</th>
+        </tr>
+        <tr style="border-bottom: 1px solid #21262d;">
+          <td style="padding: 6px 8px; color: #8b949e;">E-01 Account Lock</td>
+          <td style="padding: 6px 8px; color: #f85149;">FAIL</td>
+          <td style="padding: 6px 8px; color: #f85149;">NONE</td>
+          <td style="padding: 6px 8px; color: #f85149;">FAIL</td>
+          <td style="padding: 6px 8px; color: #f85149;">PHISHING</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #21262d;">
+          <td style="padding: 6px 8px; color: #8b949e;">E-02 PayPal $847</td>
+          <td style="padding: 6px 8px; color: #e3b341;">SOFTFAIL</td>
+          <td style="padding: 6px 8px; color: #f85149;">NONE</td>
+          <td style="padding: 6px 8px; color: #f85149;">FAIL</td>
+          <td style="padding: 6px 8px; color: #f85149;">PHISHING</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #21262d;">
+          <td style="padding: 6px 8px; color: #8b949e;">E-03 IT Password Reset</td>
+          <td style="padding: 6px 8px; color: #f85149;">FAIL</td>
+          <td style="padding: 6px 8px; color: #f85149;">NONE</td>
+          <td style="padding: 6px 8px; color: #f85149;">FAIL</td>
+          <td style="padding: 6px 8px; color: #f85149;">PHISHING</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #21262d;">
+          <td style="padding: 6px 8px; color: #8b949e;">E-04 DHL Delivery</td>
+          <td style="padding: 6px 8px; color: #e3b341;">SOFTFAIL</td>
+          <td style="padding: 6px 8px; color: #e3b341;">PASS*</td>
+          <td style="padding: 6px 8px; color: #e3b341;">NONE</td>
+          <td style="padding: 6px 8px; color: #e3b341;">SUSPICIOUS</td>
+        </tr>
+        <tr>
+          <td style="padding: 6px 8px; color: #8b949e;">E-05 GitHub Actions</td>
+          <td style="padding: 6px 8px; color: #3fb950;">PASS</td>
+          <td style="padding: 6px 8px; color: #3fb950;">PASS</td>
+          <td style="padding: 6px 8px; color: #3fb950;">PASS</td>
+          <td style="padding: 6px 8px; color: #3fb950;">SAFE</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div style="margin-top: 12px; padding: 8px 12px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary);">
+    <span style="font-size: 11px; color: var(--color-text-secondary);">Task 2 Evidence — Phishing Email Detection — FUTURE_CS_02 — Romano — FIT/APR26/CS8070</span>
+  </div>
+</div>
